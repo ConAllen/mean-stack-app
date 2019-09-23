@@ -3,10 +3,13 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import {PostCreateComponent } from './posts/post-create/posts-create.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    PostCreateComponent
+
   ],
   imports: [
     BrowserModule,
@@ -16,3 +19,4 @@ import { AppComponent } from './app.component';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+afasdfasdfasdf
