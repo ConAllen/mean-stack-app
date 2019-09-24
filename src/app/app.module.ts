@@ -19,4 +19,4 @@ import {PostCreateComponent } from './posts/post-create/posts-create.component';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
-afasdfasdfasdf
+
