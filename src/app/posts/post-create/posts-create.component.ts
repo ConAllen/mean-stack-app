@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
-@Component ({
+@Component({
   selector: 'app-post-create',
   templateUrl: './posts-create.component.html',
-  styleUrls: [ './posts-create.component.css' ]
+  styleUrls: ['./posts-create.component.css']
 })
 export class PostCreateComponent {
   enteredValue = '';
