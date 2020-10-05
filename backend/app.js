@@ -18,6 +18,8 @@ mongoose.connect('mongodb+srv://con:OrW5L8JvKQwTvjFi@post-board-app.xrln3.mongod
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+
+// coors
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -30,8 +32,9 @@ app.use((req, res, next) => {
   );
   next();
 });
-// add posts to the db
 
+
+// add posts to the db
 app.post("/api/posts", (req, res, next) => {
   const post = new Post({
     title: req.body.title,
@@ -61,13 +64,14 @@ app.get("/api/posts", (req, res, next) => {
 
 });
 
-app.delete("/api/posts/:id", (req, res, next) =>{
-  console.log(req.params.id);
+app.delete("/api/posts/:id", (req, res, next) => {
+  console.log(' PARAM', req.params.id);
 
   // delete from mongoose modal
-  Post.deleteOne({_id: req.params.id}).then(result =>{
+  Post.deleteOne({_id: req.params.id}).then(result => {
     console.log(result);
   }).catch('error');
+
   res.status(200).json({
     message: 'post deleted'
   });

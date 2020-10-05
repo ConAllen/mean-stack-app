@@ -22,8 +22,8 @@ export class PostsServiceService {
       .get<{ message: string, posts: any[] }>(
         'http://localhost:3000/api/posts'
       )
-      .pipe(map(postData => {
-        return postData.posts.map(post => {
+      .pipe(map( postData => {
+        return postData.posts.map( post => {
           return {
             title: post.title,
             content: post.content,
@@ -31,7 +31,7 @@ export class PostsServiceService {
           };
         });
       }))
-      .subscribe(mappedPosts => {
+      .subscribe( mappedPosts => {
         this.posts = mappedPosts;
         console.log('con', this.posts);
         this.postsUpdated.next([...this.posts]);
@@ -39,6 +39,14 @@ export class PostsServiceService {
 
       });
   }
+
+getPost(id: string) {
+  // returns a clone of hte obj we return. we use
+  //the spread operator to pull our all details of the object so we dont change the innitial obj
+  return {...this.posts.find( p => p.id === id )};
+
+}
+
 
   getPostUpdatedLister() {
     return this.postsUpdated.asObservable();
