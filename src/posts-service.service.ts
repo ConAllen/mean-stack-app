@@ -43,10 +43,27 @@ export class PostsServiceService {
 getPost(id: string) {
   // returns a clone of hte obj we return. we use
   //the spread operator to pull our all details of the object so we dont change the innitial obj
-  return {...this.posts.find( p => p.id === id )};
+  // return {...this.posts.find( p => p.id === id )};
+  return this.http.get<{_id: string, title: string, content: string}>('http://localhost:3000/api/posts/' + id);
 
 }
 
+  updatePost(id: string, title: string, content: string) {
+      const post: Post = { id, title, content };
+      this.http.put('http://localhost:3000/api/posts/' + id, post)
+      .subscribe( data => {
+
+        const updatedPosts = [ ...this.posts];
+        const oldPostIndex = updatedPosts.findIndex( p => p.id === post.id);
+        updatedPosts[oldPostIndex] = post;
+
+        this.posts = updatedPosts;
+
+        this.postsUpdated.next([...this.posts]);
+
+      });
+
+  }
 
   getPostUpdatedLister() {
     return this.postsUpdated.asObservable();
@@ -66,7 +83,8 @@ getPost(id: string) {
   }
 
   deletePost(postId: string) {
-    return this.http.delete('http://localhost:3000/api/posts/' + postId).subscribe(deletedPost => {
+    return this.http.delete('http://localhost:3000/api/posts/' + postId)
+    .subscribe(deletedPost => {
       console.log(deletedPost);
       const updatedPost = this.posts.filter( post => post.id !== postId);
       this.posts = updatedPost;
