@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/post');
 
-const multer = require("multer"); 
+const multer = require("multer");
 
 const MIME_TYPE_MAP = {
   'image/png': 'png',
@@ -10,10 +10,10 @@ const MIME_TYPE_MAP = {
   'image/jpg': 'jpg'
 };
 const storage = multer.diskStorage({
-  destination: (req, file, cb ) => {
+  destination: (req, file, cb) => {
     const isValid = MIME_TYPE_MAP[file.mimetype];
     let error = new Error("Invalid mime type");
-    if (isValid){
+    if (isValid) {
       error = null;
     }
     cb(error, "backend/images")
@@ -25,17 +25,26 @@ const storage = multer.diskStorage({
   }
 });
 // add posts to the db
-router.post("", multer({storage: storage}).single("image"),(req, res, next) => {
+router.post("", multer({ storage: storage }).single("image"), (req, res, next) => {
+
+  const url = req.protocol + '://' + req.get("host");
+
   const post = new Post({
     title: req.body.title,
-    content: req.body.content
+    content: req.body.content,
+    imagePath: url + "/images/" + req.file.filename
   });
   // console.log(post);
-  post.save().then(result => {
-    console.log('result', result);
+  post.save().then(createdPost => {
+    console.log('createdPost', createdPost);
     res.status(201).json({
       message: 'Post added successfully',
-      postId: result._id
+      post: {
+        ...createdPost,
+        id: createdPost._id,
+
+      }
+
     });
   });
 });
@@ -56,34 +65,43 @@ router.get("", (req, res, next) => {
 
 
 router.get('/:id', (req, res, next) => {
-   Post.findById(req.params.id).then( post => {
-     if(post){
+  Post.findById(req.params.id).then(post => {
+    if (post) {
       res.status(200).json(post);
-     } else {
-      res.status(404).json({message: 'Post Not Found'})
-     }
-   })
+    } else {
+      res.status(404).json({ message: 'Post Not Found' })
+    }
+  })
 })
 
 // update
-router.put("/:id", (req, res,next) => {
-  const post = new Post({
-    _id: req.params.id,
-    title: req.body.title,
-    content: req.body.content
+router.put("/:id", multer({ storage: storage }).single("image"), (req, res, next) => {
+    console.log(req.file);
+    let imagePath = req.body.imagePath;
+    
+    if (req.file) {
+      const url = req.protocol + '://' + req.get("host");
+      imagePath = url + "/images/" + req.file.filename
+    }
+    const post = new Post({
+      _id: req.params.id,
+      title: req.body.title,
+      content: req.body.content,
+      imagePath: imagePath
+    });
+     console.log('post obj', post);
+     
+    Post.updateOne({ _id: req.params.id }, post).then(result => {
+      console.log(result);
+      res.status(200).json({ message: 'Update Successful' });
+    })
   });
-
-  Post.updateOne({_id: req.params.id}, post ).then( result => {
-    console.log(result);
-    res.status(200).json({ message: 'Update Successful'});
-  })
-});
 
 router.delete("/:id", (req, res, next) => {
   console.log(' PARAM', req.params.id);
 
   // delete from mongoose modal
-  Post.deleteOne({_id: req.params.id}).then(result => {
+  Post.deleteOne({ _id: req.params.id }).then(result => {
     console.log(result);
   }).catch('error');
 

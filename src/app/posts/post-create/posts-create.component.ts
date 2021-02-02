@@ -3,7 +3,7 @@ import { Post } from '../post.model';
 import { PostsServiceService } from 'src/posts-service.service';
 import { FormGroup, FormControl, Validators, NgForm } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-
+import { mimeType } from './mime-type.validator'
 @Component({
   selector: 'app-post-create',
   templateUrl: './posts-create.component.html',
@@ -11,8 +11,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 })
 export class PostCreateComponent implements OnInit {
 
-  enteredTitle = '';
-  enteredContent = '';
+
   post: Post;
   private mode = 'create';
   private postId: string;
@@ -29,13 +28,12 @@ export class PostCreateComponent implements OnInit {
       title: new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)]
       }),
-      content: new FormControl(null, {
-        validators: [Validators.required]
-      }),
+      content: new FormControl(null, { validators: [Validators.required] }),
       image: new FormControl(null, {
-        validators: [Validators.required]
+        validators: [Validators.required],
+        asyncValidators: [mimeType]
       })
-    })
+    });
     this.isLoading = true;
     this.route.paramMap.subscribe((paramMap: ParamMap) => {
       if (paramMap.has("postId")) {
@@ -43,10 +41,16 @@ export class PostCreateComponent implements OnInit {
         this.isLoading = false;
         this.postId = paramMap.get('postId');
         this.postService.getPost(this.postId).subscribe(postData => {
-          this.post = { id: postData._id, title: postData.title, content: postData.content };
+          this.post = {
+            id: postData._id,
+            title: postData.title,
+            content: postData.content,
+            imagePath: postData.imagePath
+          };
           this.form.setValue({
             title: this.post.title,
-            content: this.post.content
+            content: this.post.content,
+            image: this.post.imagePath
           })
 
         });
@@ -64,19 +68,21 @@ export class PostCreateComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-
-
-    if (this.mode === 'create') {
-      this.postService.addPost(this.form.value.title, this.form.value.content);
-      this.form.reset();
+    if (this.mode === "create") {
+      this.postService.addPost(
+        this.form.value.title,
+        this.form.value.content,
+        this.form.value.image
+      );
     } else {
-      this.postService.updatePost(this.postId, this.form.value.title, this.form.value.content);
-      this.form.reset();
+      this.postService.updatePost(
+        this.postId,
+        this.form.value.title,
+        this.form.value.content,
+        this.form.value.image
+      );
     }
-
-    this.postService.addPost(this.form.value.title, this.form.value.content);
     this.form.reset();
-
   }
 
   onImagePicked(event: Event) {
